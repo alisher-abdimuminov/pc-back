@@ -58,6 +58,9 @@ class HemisClient:
 			headers={"Authorization": f"Bearer {token}"},
 			timeout=15,
 		)
+
+		print(r.text)
+
 		r.raise_for_status()
 		return r.json()
 
