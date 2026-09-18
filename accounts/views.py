@@ -50,7 +50,7 @@ def hemis_callback(request):
 	print(request.data)
 	print("----")
 	code = request.data.get("code")
-	kind = request.data.get("hemis_type", "student")
+	kind = request.data.get("type", "student")
 	if not code or kind not in {"student", "teacher"}:
 		return Response({"detail": "code va to'g'ri type majburiy"}, status=400)
 	try:
