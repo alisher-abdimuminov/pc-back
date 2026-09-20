@@ -9,7 +9,6 @@ wheels/
 # Virtual environments
 .venv
 db.sqlite3
-main.py
 media
 .env
 .env.prod
