@@ -129,6 +129,10 @@ HEMIS = {
 	"IMAGE_ALLOWED_HOSTS": config("HEMIS_IMAGE_ALLOWED_HOSTS"),
 }
 
+HEMIS_GROUPS_TOKEN = config("HEMIS_GROUPS_TOKEN")
+
+HEMIS_GROUPS_URL = "https://student.samdpi.uz/rest/v1/data/group-list"
+
 ATTENDANCE_STEPS = {
 	1: {"start": "00:00", "end": "10:00"},
 	2: {"start": "10:00", "end": "12:00"},

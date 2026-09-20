@@ -16,6 +16,9 @@ dependencies = [
     "python-decouple>=3.8",
     "requests>=2.34.2",
     "retina-face>=0.0.18",
+    "shapely>=2.1.2",
+    "tf-keras>=2.21.0",
+    "torch>=2.14.0",
 ]
 
 [tool.ruff.format]
