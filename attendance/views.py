@@ -315,7 +315,6 @@ class AttendanceViewSet(viewsets.ReadOnlyModelViewSet):
 class AttendanceAttemptViewSet(viewsets.ReadOnlyModelViewSet):
 	serializer_class = AttendanceAttemptSerializer
 	permission_classes = [IsTeacherOrAdmin]
-	pagination_class = None
 
 	def get_queryset(self):
 		qs = AttendanceAttempt.objects.select_related(
