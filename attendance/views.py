@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import (
 	status,
@@ -197,9 +198,31 @@ class AttendanceAttemptViewSet(viewsets.ReadOnlyModelViewSet):
 			qs = qs.filter(student__group__teacher=user)
 
 		date = self.request.query_params.get("date")
+		status_value = self.request.query_params.get("status")
+		error_code = self.request.query_params.get("error_code")
+		search = self.request.query_params.get("search")
 
 		if date:
 			qs = qs.filter(attempted_at__date=date)
+
+		if status_value == "success":
+			qs = qs.filter(success=True)
+
+		elif status_value == "failed":
+			qs = qs.filter(success=False)
+
+		if error_code:
+			qs = qs.filter(error_code=error_code)
+
+		if search:
+			qs = qs.filter(
+				Q(student__full_name__icontains=search)
+				| Q(student__username__icontains=search)
+				| Q(ip_address__icontains=search)
+				| Q(location__name__icontains=search)
+				| Q(error_code__icontains=search)
+				| Q(error_message__icontains=search)
+			)
 
 		return qs
 

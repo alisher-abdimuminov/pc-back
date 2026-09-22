@@ -13,6 +13,7 @@ class GroupSerializer(serializers.ModelSerializer):
 		model = Group
 		fields = [
 			"id",
+			"hemis_id",
 			"name",
 			"teacher",
 			"teacher_name",
