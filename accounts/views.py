@@ -77,19 +77,48 @@ def me(request):
 class UserViewSet(viewsets.ModelViewSet):
 	serializer_class = UserSerializer
 	permission_classes = [IsAdmin]
-	http_method_names = ["get", "patch", "head", "options"]
+
+	http_method_names = [
+		"get",
+		"patch",
+		"head",
+		"options",
+	]
 
 	def get_queryset(self):
 		queryset = (
-			User.objects.select_related("group").all().order_by("full_name", "username")
+			User.objects.select_related("group")
+			.filter(
+				role__in=[
+					User.Role.STUDENT,
+					User.Role.TEACHER,
+				]
+			)
+			.order_by(
+				"full_name",
+				"username",
+			)
 		)
 
 		user_type = self.request.query_params.get("type")
 
 		if user_type == "teacher":
-			queryset = queryset.filter(role="teacher")
+			return queryset.filter(role=User.Role.TEACHER)
 
-		elif user_type in ["student", "talaba"]:
-			queryset = queryset.filter(role="student")
+		if user_type in [
+			"student",
+			"talaba",
+		]:
+			return queryset.filter(role=User.Role.STUDENT)
 
 		return queryset
+
+	def paginate_queryset(self, queryset):
+		user_type = self.request.query_params.get("type")
+
+		# Teacher list Select uchun ishlatiladi.
+		# Barcha teacherlar bir requestda keladi.
+		if user_type == "teacher":
+			return None
+
+		return super().paginate_queryset(queryset)
