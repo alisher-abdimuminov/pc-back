@@ -19,6 +19,7 @@ from .services import sync_hemis_groups
 
 class GroupViewSet(viewsets.ModelViewSet):
 	serializer_class = GroupSerializer
+	pagination_class = None
 
 	def get_permissions(self):
 		return (
