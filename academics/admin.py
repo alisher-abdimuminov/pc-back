@@ -1,3 +1,9 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 
-# Register your models here.
+from .models import Schedule
+
+
+@admin.register(Schedule)
+class ScheduleModelAdmin(ModelAdmin):
+	list_display = ["weekday", "shift", "location", "groups"]
