@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from rest_framework import (
 	status,
 	viewsets,
@@ -143,11 +144,151 @@ def check(request):
 
 class AttendanceViewSet(viewsets.ReadOnlyModelViewSet):
 	serializer_class = AttendanceSerializer
-
 	permission_classes = [IsAuthenticated]
 
+	# Bu monitoring endpointda bitta guruhdagi
+	# barcha talabalar birdan chiqishi kerak.
+	# Global DRF pagination bu endpointga ta'sir qilmaydi.
+	pagination_class = None
+
+	def list(self, request, *args, **kwargs):
+		user = request.user
+
+		group_id = request.query_params.get("group")
+		date_value = request.query_params.get("date")
+
+		# ----------------------------------
+		# GROUP REQUIRED
+		# ----------------------------------
+
+		if not group_id:
+			return Response([])
+
+		# ----------------------------------
+		# DATE
+		# ----------------------------------
+
+		if date_value:
+			selected_date = parse_date(date_value)
+
+			if not selected_date:
+				return Response(
+					{"detail": "Sana noto‘g‘ri formatda."},
+					status=status.HTTP_400_BAD_REQUEST,
+				)
+		else:
+			selected_date = timezone.localdate()
+
+		# ----------------------------------
+		# STUDENTS
+		# ----------------------------------
+
+		students = (
+			User.objects.filter(
+				role=User.Role.STUDENT,
+				group_id=group_id,
+			)
+			.select_related("group")
+			.order_by(
+				"full_name",
+				"username",
+			)
+		)
+
+		# Teacher faqat o‘ziga biriktirilgan
+		# guruh talabalarini ko‘ra oladi.
+		if user.role == User.Role.TEACHER:
+			students = students.filter(group__teacher=user)
+
+		student_list = list(students)
+
+		if not student_list:
+			return Response([])
+
+		student_ids = [student.id for student in student_list]
+
+		# ----------------------------------
+		# ATTENDANCE FOR SELECTED DATE
+		# ----------------------------------
+
+		attendances = (
+			Attendance.objects.filter(
+				student_id__in=student_ids,
+				date=selected_date,
+			)
+			.select_related(
+				"student",
+				"schedule",
+				"schedule__location",
+			)
+			.prefetch_related("records")
+		)
+
+		# student_id -> records
+		records_by_student = {}
+
+		for attendance in attendances:
+			if attendance.student_id not in records_by_student:
+				records_by_student[attendance.student_id] = []
+
+			records_by_student[attendance.student_id].extend(
+				list(attendance.records.all())
+			)
+
+		# ----------------------------------
+		# RESPONSE
+		# ----------------------------------
+
+		result = []
+
+		for student in student_list:
+			records = records_by_student.get(
+				student.id,
+				[],
+			)
+
+			serialized_records = AttendanceRecordSerializer(
+				records,
+				many=True,
+				context={"request": request},
+			).data
+
+			result.append(
+				{
+					# Monitoring row ID sifatida
+					# student ID ishlatamiz.
+					"id": student.id,
+					"student": student.id,
+					"student_name": (student.full_name or student.username),
+					"student_username": student.username,
+					"group": student.group_id,
+					"group_name": (student.group.name if student.group else None),
+					"date": selected_date,
+					"records": serialized_records,
+				}
+			)
+
+		return Response(result)
+
+	def retrieve(
+		self,
+		request,
+		*args,
+		**kwargs,
+	):
+		return super().retrieve(
+			request,
+			*args,
+			**kwargs,
+		)
+
 	def get_queryset(self):
-		queryset = (
+		"""
+		Retrieve yoki boshqa ichki foydalanish uchun
+		eski querysetni saqlab qolamiz.
+		"""
+
+		qs = (
 			Attendance.objects.select_related(
 				"student",
 				"schedule",
@@ -163,27 +304,18 @@ class AttendanceViewSet(viewsets.ReadOnlyModelViewSet):
 		user = self.request.user
 
 		if user.role == User.Role.STUDENT:
-			queryset = queryset.filter(student=user)
+			qs = qs.filter(student=user)
 
 		elif user.role == User.Role.TEACHER:
-			queryset = queryset.filter(student__group__teacher=user)
+			qs = qs.filter(student__group__teacher=user)
 
-		group_id = self.request.query_params.get("group")
-
-		date = self.request.query_params.get("date")
-
-		if group_id:
-			queryset = queryset.filter(student__group_id=group_id)
-
-		if date:
-			queryset = queryset.filter(date=date)
-
-		return queryset.distinct()
+		return qs.distinct()
 
 
 class AttendanceAttemptViewSet(viewsets.ReadOnlyModelViewSet):
 	serializer_class = AttendanceAttemptSerializer
 	permission_classes = [IsTeacherOrAdmin]
+	pagination_class = None
 
 	def get_queryset(self):
 		qs = AttendanceAttempt.objects.select_related(
