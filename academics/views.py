@@ -95,6 +95,7 @@ class StudentViewSet(viewsets.ReadOnlyModelViewSet):
 class LocationViewSet(viewsets.ModelViewSet):
 	queryset = Location.objects.all().order_by("name")
 	serializer_class = LocationSerializer
+	pagination_class = None
 
 	def get_permissions(self):
 		return (
@@ -106,6 +107,7 @@ class LocationViewSet(viewsets.ModelViewSet):
 
 class ScheduleViewSet(viewsets.ModelViewSet):
 	serializer_class = ScheduleSerializer
+	pagination_class = None
 
 	def get_permissions(self):
 		return (
