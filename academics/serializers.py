@@ -34,6 +34,10 @@ class LocationSerializer(serializers.ModelSerializer):
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
+	shift_name = serializers.CharField(
+		source="get_shift_display",
+		read_only=True,
+	)
 	location_detail = LocationSerializer(source="location", read_only=True)
 	group_details = GroupSerializer(source="groups", many=True, read_only=True)
 
@@ -44,7 +48,8 @@ class ScheduleSerializer(serializers.ModelSerializer):
 			"weekday",
 			"location",
 			"location_detail",
-			"groups",
+			"shift",
+			"shift_namegroups",
 			"group_details",
 			"is_active",
 			"created_at",

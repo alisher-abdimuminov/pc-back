@@ -24,12 +24,17 @@ def client_ip(request):
 	return request.META.get("REMOTE_ADDR")
 
 
-def current_step(now=None):
+def current_step(schedule, now=None):
 	now = timezone.localtime(now or timezone.now())
 
 	current_time = now.time().replace(tzinfo=None)
 
-	for step, cfg in settings.ATTENDANCE_STEPS.items():
+	shift_steps = settings.ATTENDANCE_SHIFTS.get(
+		schedule.shift,
+		{},
+	)
+
+	for step, cfg in shift_steps.items():
 		start_hour, start_minute = map(
 			int,
 			cfg["start"].split(":"),
@@ -160,7 +165,7 @@ def verify_attendance(
 
 	schedule = today_schedule(student)
 
-	step = current_step()
+	step = current_step(schedule) if schedule else None
 
 	ip = client_ip(request)
 

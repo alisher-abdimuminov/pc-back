@@ -52,8 +52,6 @@ def today(request):
 
 	now = timezone.localtime()
 
-	step = current_step(now)
-
 	if not schedule:
 		return Response(
 			{
@@ -62,6 +60,11 @@ def today(request):
 				"steps": [],
 			}
 		)
+
+	step = current_step(
+		schedule,
+		now,
+	)
 
 	attendance = (
 		Attendance.objects.filter(
@@ -75,9 +78,14 @@ def today(request):
 
 	done = {record.step for record in attendance.records.all()} if attendance else set()
 
+	shift_steps = settings.ATTENDANCE_SHIFTS.get(
+		schedule.shift,
+		{},
+	)
+
 	steps = []
 
-	for number, config in settings.ATTENDANCE_STEPS.items():
+	for number, config in shift_steps.items():
 		number = int(number)
 
 		if number in done:
@@ -107,6 +115,8 @@ def today(request):
 			"date": timezone.localdate(),
 			"server_time": now,
 			"schedule_id": schedule.id,
+			"shift": schedule.shift,
+			"shift_name": schedule.get_shift_display(),
 			"location": {
 				"id": schedule.location_id,
 				"name": schedule.location.name,

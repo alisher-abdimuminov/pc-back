@@ -73,6 +73,10 @@ class Location(models.Model):
 
 
 class Schedule(models.Model):
+	class Shift(models.IntegerChoices):
+		FIRST = 1, "1-smena"
+		SECOND = 2, "2-smena"
+
 	class Weekday(models.IntegerChoices):
 		MONDAY = 0, "Monday"
 		TUESDAY = 1, "Tuesday"
@@ -83,6 +87,10 @@ class Schedule(models.Model):
 		SUNDAY = 6, "Sunday"
 
 	weekday = models.PositiveSmallIntegerField(choices=Weekday.choices)
+	shift = models.PositiveSmallIntegerField(
+		choices=Shift.choices,
+		default=Shift.FIRST,
+	)
 	location = models.ForeignKey(
 		Location, on_delete=models.PROTECT, related_name="schedules"
 	)
@@ -91,4 +99,4 @@ class Schedule(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
-		return f"{self.get_weekday_display()} - {self.location}"
+		return f"{self.get_weekday_display()} - {self.location} - {self.get_shift_display()}"

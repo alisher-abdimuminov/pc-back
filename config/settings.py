@@ -133,11 +133,37 @@ HEMIS_GROUPS_TOKEN = config("HEMIS_GROUPS_TOKEN")
 
 HEMIS_GROUPS_URL = "https://student.samdpi.uz/rest/v1/data/group-list"
 
-ATTENDANCE_STEPS = {
-	1: {"start": "00:00", "end": "10:00"},
-	2: {"start": "10:00", "end": "12:00"},
-	3: {"start": "12:00", "end": "14:00"},
+ATTENDANCE_SHIFTS = {
+	1: {
+		1: {
+			"start": "08:00",
+			"end": "10:00",
+		},
+		2: {
+			"start": "10:00",
+			"end": "12:00",
+		},
+		3: {
+			"start": "12:00",
+			"end": "14:00",
+		},
+	},
+	2: {
+		1: {
+			"start": "12:00",
+			"end": "14:00",
+		},
+		2: {
+			"start": "14:00",
+			"end": "16:00",
+		},
+		3: {
+			"start": "16:00",
+			"end": "18:00",
+		},
+	},
 }
+
 FACE_VERIFY = {
 	"MODEL_NAME": config("FACE_MODEL_NAME", default="ArcFace"),
 	"DETECTOR_BACKEND": config("FACE_DETECTOR_BACKEND", default="retinaface"),
