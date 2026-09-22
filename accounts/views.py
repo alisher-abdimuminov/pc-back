@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -78,6 +79,14 @@ class UserViewSet(viewsets.ModelViewSet):
 	serializer_class = UserSerializer
 	permission_classes = [IsAdmin]
 
+	filter_backends = [SearchFilter]
+
+	search_fields = [
+		"full_name",
+		"username",
+		"group__name",
+	]
+
 	http_method_names = [
 		"get",
 		"patch",
@@ -116,8 +125,6 @@ class UserViewSet(viewsets.ModelViewSet):
 	def paginate_queryset(self, queryset):
 		user_type = self.request.query_params.get("type")
 
-		# Teacher list Select uchun ishlatiladi.
-		# Barcha teacherlar bir requestda keladi.
 		if user_type == "teacher":
 			return None
 
