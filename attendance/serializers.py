@@ -30,9 +30,48 @@ class AttendanceSerializer(serializers.ModelSerializer):
 
 
 class AttendanceAttemptSerializer(serializers.ModelSerializer):
+	student_name = serializers.CharField(
+		source="student.full_name",
+		read_only=True,
+	)
+
+	student_username = serializers.CharField(
+		source="student.username",
+		read_only=True,
+	)
+
+	location_name = serializers.CharField(
+		source="location.name",
+		read_only=True,
+	)
+
 	class Meta:
 		model = AttendanceAttempt
-		fields = "__all__"
+
+		fields = [
+			"id",
+			"student",
+			"student_name",
+			"student_username",
+			"schedule",
+			"step",
+			"attempted_at",
+			"image",
+			"ip_address",
+			"latitude",
+			"longitude",
+			"location",
+			"location_name",
+			"face_verified",
+			"location_verified",
+			"liveness_verified",
+			"success",
+			"error_code",
+			"error_message",
+			"face_distance",
+			"face_threshold",
+			"user_agent",
+		]
 
 
 class AttendanceCheckSerializer(serializers.Serializer):

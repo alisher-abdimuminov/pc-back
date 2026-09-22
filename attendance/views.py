@@ -182,11 +182,10 @@ class AttendanceViewSet(viewsets.ReadOnlyModelViewSet):
 
 class AttendanceAttemptViewSet(viewsets.ReadOnlyModelViewSet):
 	serializer_class = AttendanceAttemptSerializer
-
 	permission_classes = [IsTeacherOrAdmin]
 
 	def get_queryset(self):
-		queryset = AttendanceAttempt.objects.select_related(
+		qs = AttendanceAttempt.objects.select_related(
 			"student",
 			"schedule",
 			"location",
@@ -195,9 +194,14 @@ class AttendanceAttemptViewSet(viewsets.ReadOnlyModelViewSet):
 		user = self.request.user
 
 		if user.role == User.Role.TEACHER:
-			queryset = queryset.filter(student__group__teacher=user)
+			qs = qs.filter(student__group__teacher=user)
 
-		return queryset
+		date = self.request.query_params.get("date")
+
+		if date:
+			qs = qs.filter(attempted_at__date=date)
+
+		return qs
 
 
 class AttendanceLocationCheckView(APIView):
