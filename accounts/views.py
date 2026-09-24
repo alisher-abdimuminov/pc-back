@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -13,6 +14,8 @@ from .serializers import UserSerializer
 
 
 def tokens_for(user):
+	if not user.is_active:
+		raise AuthenticationFailed("Hisobingiz faol emas.")
 	refresh = RefreshToken.for_user(user)
 	return {"access": str(refresh.access_token), "refresh": str(refresh)}
 

@@ -6,4 +6,4 @@ from .models import Schedule
 
 @admin.register(Schedule)
 class ScheduleModelAdmin(ModelAdmin):
-	list_display = ["weekday", "shift", "location", "groups"]
+	list_display = ["weekday", "shift", "location"]
