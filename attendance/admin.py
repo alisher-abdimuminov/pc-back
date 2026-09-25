@@ -11,7 +11,12 @@ class AttendanceModelAdmin(ModelAdmin):
 
 @admin.register(AttendanceAttempt)
 class AttendanceAttemptModelAdmin(ModelAdmin):
-	list_display = []
+	list_display = [
+		"student",
+		"schedule",
+		"step",
+	]
+	search_fields = ("student__username",)
 
 
 @admin.register(AttendanceRecord)
