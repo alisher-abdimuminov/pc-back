@@ -18,3 +18,7 @@ class AttendanceAttemptModelAdmin(ModelAdmin):
 @admin.register(AttendanceRecord)
 class AttendanceRecordModelAdmin(ModelAdmin):
 	list_display = ["attendance__student", "step", "face_verified", "location_verified"]
+	search_fields = (
+		"attendance__student__full_name",
+		"attendance__student__username",
+	)
