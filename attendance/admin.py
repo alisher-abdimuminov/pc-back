@@ -17,4 +17,4 @@ class AttendanceAttemptModelAdmin(ModelAdmin):
 
 @admin.register(AttendanceRecord)
 class AttendanceRecordModelAdmin(ModelAdmin):
-	list_display = ["attendance", "step", "face_verified", "location_verified"]
+	list_display = ["attendance__student", "step", "face_verified", "location_verified"]
